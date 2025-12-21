@@ -4,7 +4,7 @@ import { TABELAS } from '../config/tabelas';
 
 export const empreendimentoController = {
   // Listar empreendimentos
-  getAll: async (req: Request, res: Response) => {
+  getAll: async (_req: Request, res: Response) => {
     try {
       // Ordenar por ID (sempre existe) - remover ordenação por 'nome' que pode não existir
       const { data, error } = await supabase
@@ -14,9 +14,9 @@ export const empreendimentoController = {
 
       if (error) throw error;
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -56,13 +56,13 @@ export const empreendimentoController = {
 
       if (contatoError) throw contatoError;
 
-      res.json({
+      return res.json({
         ...empreendimento,
         unidades: unidades || [],
         contato_sindico: contatoSindico || null
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -77,9 +77,9 @@ export const empreendimentoController = {
 
       if (error) throw error;
 
-      res.status(201).json(data);
+      return res.status(201).json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -101,10 +101,13 @@ export const empreendimentoController = {
         return res.status(404).json({ error: 'Empreendimento não encontrado' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

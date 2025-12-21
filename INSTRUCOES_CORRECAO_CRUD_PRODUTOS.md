@@ -467,3 +467,6 @@ fetch('/api/produtos/1', { method: 'PUT', ... });
 ---
 
 **Última atualização:** Janeiro 2024
+
+
+

@@ -3,7 +3,7 @@ import { supabase } from '../config/supabase';
 import { TABELAS } from '../config/tabelas';
 
 export const dashboardController = {
-  getDashboard: async (req: Request, res: Response) => {
+  getDashboard: async (_req: Request, res: Response) => {
     try {
       // Total de unidades
       const { count: totalUnidades, error: unidadesError } = await supabase
@@ -42,7 +42,7 @@ export const dashboardController = {
       // Buscar produtos
       const produtosIds = unidadesProdutos?.map((up: any) => up.id_produto) || [];
       const { data: produtos, error: produtosError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .in('id', produtosIds);
 
@@ -150,7 +150,7 @@ export const dashboardController = {
         new Date(a.data_proximo_preventivo).getTime() - new Date(b.data_proximo_preventivo).getTime()
       );
 
-      res.json({
+      return res.json({
         total_unidades: totalUnidades || 0,
         total_garantias_validas: totalGarantiasValidas,
         total_garantias_vencidas: totalGarantiasVencidas,
@@ -160,8 +160,11 @@ export const dashboardController = {
         proximos_preventivos: proximosPreventivos.slice(0, 10) // Limitar a 10 próximos
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

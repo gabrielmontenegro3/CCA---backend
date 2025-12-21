@@ -4,7 +4,7 @@ import { TABELAS } from '../config/tabelas';
 
 export const localController = {
   // Listar todos os locais
-  getAll: async (req: Request, res: Response) => {
+  getAll: async (_req: Request, res: Response) => {
     try {
       const { data, error } = await supabase
         .from(TABELAS.LOCAIS)
@@ -118,3 +118,6 @@ export const localController = {
     }
   }
 };
+
+
+

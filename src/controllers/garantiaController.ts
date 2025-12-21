@@ -83,7 +83,7 @@ export const garantiaController = {
       // Buscar produtos
       const { data: produtos, error: produtosError } = produtosIds.length > 0
         ? await supabase
-            .from(TABELAS.PRODUTO)
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .in('id', produtosIds)
         : { data: [], error: null };
@@ -200,7 +200,7 @@ export const garantiaController = {
       if (unidadeError) throw unidadeError;
 
       const { data: produto, error: produtoError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', data.id_produto)
         .single();
@@ -234,7 +234,7 @@ export const garantiaController = {
       // Normalizar ID
       const idNormalizado = data.id || data.id_unidade_produto_garantia;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         Unidade: unidade,
@@ -245,7 +245,7 @@ export const garantiaController = {
       });
     } catch (error: any) {
       console.error('Erro ao buscar garantia:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -287,7 +287,7 @@ export const garantiaController = {
       let produtoError = null;
 
       const result1 = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id_produto)
         .single();
@@ -295,7 +295,7 @@ export const garantiaController = {
       if (result1.error) {
         // Tentar com id_produto
         const result2 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id_produto', id_produto)
           .single();
@@ -366,7 +366,7 @@ export const garantiaController = {
       // Normalizar ID
       const idNormalizado = novaGarantia.id || novaGarantia.id_unidade_produto_garantia;
 
-      res.status(201).json({
+      return res.status(201).json({
         ...novaGarantia,
         id: idNormalizado,
         Unidade: unidade,
@@ -377,7 +377,7 @@ export const garantiaController = {
       });
     } catch (error: any) {
       console.error('Erro ao criar garantia:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -433,7 +433,7 @@ export const garantiaController = {
           .single();
 
         const { data: produto } = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id', garantiaExistente.id_produto)
           .single();
@@ -506,18 +506,19 @@ export const garantiaController = {
         .single();
 
       const { data: produto } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', data.id_produto)
         .single();
 
-      const { data: empreendimento } = unidade
+      const empreendimentoResult = unidade
         ? await supabase
             .from(TABELAS.EMPREENDIMENTO)
             .select('*')
             .eq('id', unidade.id_empreendimento)
             .single()
-        : { data: null, error: null };
+        : { data: null };
+      const empreendimento = empreendimentoResult.data;
 
       // Determinar data_base
       const dataBase = data.data_instalacao
@@ -540,7 +541,7 @@ export const garantiaController = {
       // Normalizar ID
       const idNormalizado = data.id || data.id_unidade_produto_garantia;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         Unidade: unidade,
@@ -551,7 +552,7 @@ export const garantiaController = {
       });
     } catch (error: any) {
       console.error('Erro ao atualizar garantia:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
@@ -607,13 +608,16 @@ export const garantiaController = {
         return res.status(404).json({ error: 'Garantia não encontrada' });
       }
 
-      res.json({ message: 'Garantia removida com sucesso' });
+      return res.json({ message: 'Garantia removida com sucesso' });
     } catch (error: any) {
       console.error('Erro completo ao deletar:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
     }
   }
 };
+
+
+

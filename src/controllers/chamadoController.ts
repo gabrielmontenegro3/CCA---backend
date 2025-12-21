@@ -25,7 +25,7 @@ const verificarGarantia = async (idUnidade: string, idProduto: string): Promise<
 
     // Buscar produto
     const { data: produto, error: produtoError } = await supabase
-      .from(TABELAS.PRODUTO)
+      .from(TABELAS.PRODUTOS)
       .select('*')
       .eq('id', idProduto)
       .single();
@@ -33,7 +33,7 @@ const verificarGarantia = async (idUnidade: string, idProduto: string): Promise<
     if (produtoError || !produto) return false;
 
     // Buscar relação unidade-produto
-    const { data: unidadeProduto, error: upError } = await supabase
+    const { data: unidadeProduto } = await supabase
       .from(TABELAS.UNIDADE_PRODUTO_GARANTIA)
       .select('*')
       .eq('id_unidade', idUnidade)
@@ -95,9 +95,9 @@ export const chamadoController = {
 
       if (error) throw error;
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -118,9 +118,9 @@ export const chamadoController = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -149,9 +149,9 @@ export const chamadoController = {
 
       if (error) throw error;
 
-      res.status(201).json(data);
+      return res.status(201).json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -173,9 +173,9 @@ export const chamadoController = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -202,10 +202,13 @@ export const chamadoController = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

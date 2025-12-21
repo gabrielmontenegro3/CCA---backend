@@ -35,7 +35,7 @@ export const posObraController = {
       // Buscar produtos
       const { data: produtos, error: produtosError } = produtosIds.length > 0
         ? await supabase
-            .from(TABELAS.PRODUTO)
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .in('id', produtosIds)
         : { data: [], error: null };
@@ -132,7 +132,7 @@ export const posObraController = {
 
       // Buscar dados relacionados
       const { data: produto } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', data.id_produto)
         .single();
@@ -156,7 +156,7 @@ export const posObraController = {
       // Normalizar ID
       const idNormalizado = data.id_pos_obra || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_pos_obra: idNormalizado,
@@ -166,7 +166,7 @@ export const posObraController = {
       });
     } catch (error: any) {
       console.error('Erro ao buscar pós-obra:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -206,7 +206,7 @@ export const posObraController = {
 
       // Verificar se produto existe
       const { data: produto, error: produtoError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id_produto)
         .single();
@@ -214,7 +214,7 @@ export const posObraController = {
       if (produtoError) {
         // Tentar com id_produto
         const result2 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id_produto', id_produto)
           .single();
@@ -243,7 +243,7 @@ export const posObraController = {
 
       // Verificar garantia se fornecida
       if (id_garantia) {
-        const { data: garantia, error: garantiaError } = await supabase
+        const { error: garantiaError } = await supabase
           .from(TABELAS.UNIDADE_PRODUTO_GARANTIA)
           .select('*')
           .eq('id', id_garantia)
@@ -288,7 +288,7 @@ export const posObraController = {
 
       // Buscar dados relacionados para resposta
       const { data: produtoCompleto } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id_produto)
         .single();
@@ -312,7 +312,7 @@ export const posObraController = {
       // Normalizar ID
       const idNormalizado = novaPosObra.id_pos_obra || novaPosObra.id;
 
-      res.status(201).json({
+      return res.status(201).json({
         ...novaPosObra,
         id: idNormalizado,
         id_pos_obra: idNormalizado,
@@ -322,7 +322,7 @@ export const posObraController = {
       });
     } catch (error: any) {
       console.error('Erro ao criar pós-obra:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -406,7 +406,7 @@ export const posObraController = {
 
       // Buscar dados relacionados
       const { data: produto } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', data.id_produto)
         .single();
@@ -430,7 +430,7 @@ export const posObraController = {
       // Normalizar ID
       const idNormalizado = data.id_pos_obra || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_pos_obra: idNormalizado,
@@ -440,7 +440,7 @@ export const posObraController = {
       });
     } catch (error: any) {
       console.error('Erro ao atualizar pós-obra:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
@@ -495,13 +495,16 @@ export const posObraController = {
         return res.status(404).json({ error: 'Pós-obra não encontrada' });
       }
 
-      res.json({ message: 'Pós-obra removida com sucesso' });
+      return res.json({ message: 'Pós-obra removida com sucesso' });
     } catch (error: any) {
       console.error('Erro completo ao deletar:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
     }
   }
 };
+
+
+

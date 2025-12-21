@@ -42,9 +42,9 @@ export const unidadeController = {
         return res.status(404).json({ error: 'Unidade não encontrada' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -83,10 +83,13 @@ export const unidadeController = {
         return res.status(404).json({ error: 'Unidade não encontrada' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

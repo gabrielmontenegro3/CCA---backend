@@ -10,3 +10,6 @@ router.put('/:id', produtoNovoController.update);
 router.delete('/:id', produtoNovoController.delete);
 
 export default router;
+
+
+

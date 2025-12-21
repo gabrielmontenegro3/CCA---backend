@@ -4,7 +4,7 @@ import { TABELAS } from '../config/tabelas';
 
 export const fornecedorNovoController = {
   // Listar todos os fornecedores
-  getAll: async (req: Request, res: Response) => {
+  getAll: async (_req: Request, res: Response) => {
     try {
       const { data, error } = await supabase
         .from(TABELAS.FORNECEDORES)
@@ -135,3 +135,6 @@ export const fornecedorNovoController = {
     }
   }
 };
+
+
+

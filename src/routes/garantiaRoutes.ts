@@ -11,3 +11,6 @@ router.put('/:id', garantiaController.update);
 router.delete('/:id', garantiaController.delete);
 
 export default router;
+
+
+

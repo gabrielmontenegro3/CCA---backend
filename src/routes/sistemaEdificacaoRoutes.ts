@@ -10,3 +10,6 @@ router.put('/:id', sistemaEdificacaoController.update);
 router.delete('/:id', sistemaEdificacaoController.delete);
 
 export default router;
+
+
+

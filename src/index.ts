@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rota de teste
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_req: Request, res: Response) => {
   res.json({ 
     message: 'Backend API funcionando!',
     version: '1.0.0'
@@ -45,7 +45,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Rota de health check
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ 
     status: 'OK',
     timestamp: new Date().toISOString(),
@@ -74,7 +74,7 @@ app.use('/api/manutencoes-preventivas-novo', manutencaoPreventivaNovoRoutes);
 app.use('/api/fornecedor-produtos', fornecedorProdutoRoutes);
 
 // Rota de teste de conexão com Supabase
-app.get('/test-db', async (req: Request, res: Response) => {
+app.get('/test-db', async (_req: Request, res: Response) => {
   try {
     // Testa diferentes nomes de tabelas para identificar o padrão correto
     const tabelasParaTestar = [
@@ -105,7 +105,7 @@ app.get('/test-db', async (req: Request, res: Response) => {
 });
 
 // Rota de diagnóstico para verificar schema da tabela produto
-app.get('/debug/produto-schema', async (req: Request, res: Response) => {
+app.get('/debug/produto-schema', async (_req: Request, res: Response) => {
   try {
     // Tentar buscar um produto para ver a estrutura
     const { data, error } = await supabase
@@ -138,14 +138,14 @@ app.get('/debug/produto-schema', async (req: Request, res: Response) => {
       });
     }
     
-    res.json({
+    return res.json({
       tabela_correta: 'produto',
       estrutura: data && data.length > 0 ? Object.keys(data[0]) : 'Tabela vazia',
       exemplo: data && data.length > 0 ? data[0] : null,
       colunas: data && data.length > 0 ? Object.keys(data[0]) : []
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       status: 'Erro',
       error: error.message
     });
@@ -197,6 +197,9 @@ server.on('error', (error: any) => {
 });
 
 export default app;
+
+
+
 
 
 

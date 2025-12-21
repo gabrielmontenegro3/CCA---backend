@@ -10,3 +10,6 @@ router.put('/:id', manutencaoPreventivaNovoController.update);
 router.delete('/:id', manutencaoPreventivaNovoController.delete);
 
 export default router;
+
+
+

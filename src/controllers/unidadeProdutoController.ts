@@ -83,7 +83,7 @@ export const unidadeProdutoController = {
       // Buscar dados dos produtos
       const produtosIds = produtosUnidade?.map((upg: any) => upg.id_produto) || [];
       const { data: produtos, error: produtosDataError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .in('id', produtosIds);
 
@@ -116,9 +116,9 @@ export const unidadeProdutoController = {
         };
       });
 
-      res.json(produtosComGarantia);
+      return res.json(produtosComGarantia);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -152,7 +152,7 @@ export const unidadeProdutoController = {
 
       // Verificar se o produto existe
       const { data: produto, error: produtoError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id_produto)
         .single();
@@ -193,15 +193,18 @@ export const unidadeProdutoController = {
 
       if (error) throw error;
 
-      res.status(201).json({
+      return res.status(201).json({
         ...data,
         Produto: produto,
         data_base: dataBase.toISOString().split('T')[0],
         ...garantias
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

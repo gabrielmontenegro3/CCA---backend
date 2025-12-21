@@ -32,3 +32,6 @@ export const supabaseAdmin: SupabaseClient | null = supabaseServiceRoleKey
 
 export default supabase;
 
+
+
+

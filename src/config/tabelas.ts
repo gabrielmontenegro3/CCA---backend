@@ -19,10 +19,14 @@ export const TABELAS = {
   // Relacionamentos
   FORNECEDOR_PRODUTOS: 'fornecedor_produtos',
   PRODUTO_LOCAIS: 'produto_locais',
+  UNIDADE_PRODUTO_GARANTIA: 'unidade_produto_garantia',
   // Tabelas antigas (manter para compatibilidade se necessário)
   CONTATO: 'contato',
   EMPREENDIMENTO: 'empreendimento',
   UNIDADE: 'unidade',
   CHAMADO: 'chamado'
 };
+
+
+
 

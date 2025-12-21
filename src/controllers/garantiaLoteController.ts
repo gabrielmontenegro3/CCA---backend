@@ -38,14 +38,14 @@ export const garantiaLoteController = {
 
       if (produtosIds.length > 0) {
         const result1 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .in('id', produtosIds);
 
         if (result1.error) {
           // Tentar com id_produto
           const result2 = await supabase
-            .from(TABELAS.PRODUTO)
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .in('id_produto', produtosIds);
           
@@ -64,7 +64,7 @@ export const garantiaLoteController = {
       // Buscar fornecedores
       const { data: fornecedores, error: fornecedoresError } = fornecedoresIds.length > 0
         ? await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('*')
             .in('id', fornecedoresIds)
         : { data: [], error: null };
@@ -156,7 +156,7 @@ export const garantiaLoteController = {
       let produto = null;
       if (data.id_produto) {
         const { data: produtoData } = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id', data.id_produto)
           .single();
@@ -166,7 +166,7 @@ export const garantiaLoteController = {
         } else {
           // Tentar com id_produto
           const { data: produtoData2 } = await supabase
-            .from(TABELAS.PRODUTO)
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .eq('id_produto', data.id_produto)
             .single();
@@ -177,7 +177,7 @@ export const garantiaLoteController = {
       let fornecedor = null;
       if (data.id_fornecedor) {
         const { data: fornecedorData } = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', data.id_fornecedor)
           .single();
@@ -197,7 +197,7 @@ export const garantiaLoteController = {
       // Normalizar ID
       const idNormalizado = data.id_garantia_lote || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_garantia_lote: idNormalizado,
@@ -207,7 +207,7 @@ export const garantiaLoteController = {
       });
     } catch (error: any) {
       console.error('Erro ao buscar garantia de lote:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -232,7 +232,7 @@ export const garantiaLoteController = {
       // Verificar se produto existe
       let produto = null;
       const { data: produtoData, error: produtoError } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id_produto)
         .single();
@@ -240,7 +240,7 @@ export const garantiaLoteController = {
       if (produtoError) {
         // Tentar com id_produto
         const { data: produtoData2, error: produtoError2 } = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id_produto', id_produto)
           .single();
@@ -259,8 +259,8 @@ export const garantiaLoteController = {
 
       // Verificar fornecedor se fornecido
       if (id_fornecedor) {
-        const { data: fornecedor, error: fornecedorError } = await supabase
-          .from(TABELAS.FORNECEDOR)
+        const { error: fornecedorError } = await supabase
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', id_fornecedor)
           .single();
@@ -272,7 +272,7 @@ export const garantiaLoteController = {
 
       // Verificar contato se fornecido
       if (id_contato) {
-        const { data: contato, error: contatoError } = await supabase
+        const { error: contatoError } = await supabase
           .from(TABELAS.CONTATO)
           .select('*')
           .eq('id', id_contato)
@@ -306,7 +306,7 @@ export const garantiaLoteController = {
 
       if (id_fornecedor) {
         const { data: fornecedorData } = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', id_fornecedor)
           .single();
@@ -325,7 +325,7 @@ export const garantiaLoteController = {
       // Normalizar ID
       const idNormalizado = novaGarantiaLote.id_garantia_lote || novaGarantiaLote.id;
 
-      res.status(201).json({
+      return res.status(201).json({
         ...novaGarantiaLote,
         id: idNormalizado,
         id_garantia_lote: idNormalizado,
@@ -335,7 +335,7 @@ export const garantiaLoteController = {
       });
     } catch (error: any) {
       console.error('Erro ao criar garantia de lote:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -382,16 +382,16 @@ export const garantiaLoteController = {
 
       // Validar relacionamentos se estiverem sendo atualizados
       if (dataToUpdate.id_produto) {
-        const { data: produto, error: produtoError } = await supabase
-          .from(TABELAS.PRODUTO)
+        const { error: produtoError } = await supabase
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id', dataToUpdate.id_produto)
           .single();
 
         if (produtoError) {
           // Tentar com id_produto
-          const { data: produto2, error: produtoError2 } = await supabase
-            .from(TABELAS.PRODUTO)
+          const { error: produtoError2 } = await supabase
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .eq('id_produto', dataToUpdate.id_produto)
             .single();
@@ -403,8 +403,8 @@ export const garantiaLoteController = {
       }
 
       if (dataToUpdate.id_fornecedor) {
-        const { data: fornecedor, error: fornecedorError } = await supabase
-          .from(TABELAS.FORNECEDOR)
+        const { error: fornecedorError } = await supabase
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', dataToUpdate.id_fornecedor)
           .single();
@@ -415,7 +415,7 @@ export const garantiaLoteController = {
       }
 
       if (dataToUpdate.id_contato) {
-        const { data: contato, error: contatoError } = await supabase
+        const { error: contatoError } = await supabase
           .from(TABELAS.CONTATO)
           .select('*')
           .eq('id', dataToUpdate.id_contato)
@@ -467,14 +467,14 @@ export const garantiaLoteController = {
       let produto = null;
       if (data.id_produto) {
         const { data: produtoData } = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id', data.id_produto)
           .single();
         
         if (!produtoData) {
           const { data: produtoData2 } = await supabase
-            .from(TABELAS.PRODUTO)
+            .from(TABELAS.PRODUTOS)
             .select('*')
             .eq('id_produto', data.id_produto)
             .single();
@@ -487,7 +487,7 @@ export const garantiaLoteController = {
       let fornecedor = null;
       if (data.id_fornecedor) {
         const { data: fornecedorData } = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', data.id_fornecedor)
           .single();
@@ -507,7 +507,7 @@ export const garantiaLoteController = {
       // Normalizar ID
       const idNormalizado = data.id_garantia_lote || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_garantia_lote: idNormalizado,
@@ -517,7 +517,7 @@ export const garantiaLoteController = {
       });
     } catch (error: any) {
       console.error('Erro ao atualizar garantia de lote:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
@@ -572,13 +572,16 @@ export const garantiaLoteController = {
         return res.status(404).json({ error: 'Garantia de lote não encontrada' });
       }
 
-      res.json({ message: 'Garantia de lote removida com sucesso' });
+      return res.json({ message: 'Garantia de lote removida com sucesso' });
     } catch (error: any) {
       console.error('Erro completo ao deletar:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
     }
   }
 };
+
+
+

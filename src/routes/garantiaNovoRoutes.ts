@@ -10,3 +10,6 @@ router.put('/:id', garantiaNovoController.update);
 router.delete('/:id', garantiaNovoController.delete);
 
 export default router;
+
+
+

@@ -850,3 +850,6 @@ Mostrar ícone ou badge quando o produto tiver fornecedor associado.
 ---
 
 **Última atualização:** Janeiro 2024
+
+
+

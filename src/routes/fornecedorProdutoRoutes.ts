@@ -9,3 +9,6 @@ router.put('/:fornecedor_id/:produto_id', fornecedorProdutoController.update);
 router.delete('/:fornecedor_id/:produto_id', fornecedorProdutoController.delete);
 
 export default router;
+
+
+

@@ -10,3 +10,6 @@ router.put('/:id', preventivoController.update);
 router.delete('/:id', preventivoController.delete);
 
 export default router;
+
+
+

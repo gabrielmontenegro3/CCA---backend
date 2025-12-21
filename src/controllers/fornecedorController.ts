@@ -4,18 +4,18 @@ import { TABELAS } from '../config/tabelas';
 
 export const fornecedorController = {
   // Listar fornecedores
-  getAll: async (req: Request, res: Response) => {
+  getAll: async (_req: Request, res: Response) => {
     try {
       // Ordenar por ID (sempre existe)
       const { data, error } = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .select('*')
         .order('id_fornecedor', { ascending: true });
 
       if (error) {
         // Tentar com 'id' se 'id_fornecedor' não existir
         const { data: data2, error: error2 } = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .order('id', { ascending: true });
         
@@ -44,10 +44,10 @@ export const fornecedorController = {
         };
       });
 
-      res.json(fornecedoresNormalizados);
+      return res.json(fornecedoresNormalizados);
     } catch (error: any) {
       console.error('Erro ao listar fornecedores:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -61,14 +61,14 @@ export const fornecedorController = {
       let error = null;
 
       const result1 = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .select('*')
         .eq('id_fornecedor', id)
         .single();
 
       if (result1.error) {
         const result2 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', id)
           .single();
@@ -91,14 +91,14 @@ export const fornecedorController = {
       // ✅ Normalizar ID
       const idNormalizado = data.id_fornecedor || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_fornecedor: idNormalizado,
       });
     } catch (error: any) {
       console.error('Erro ao buscar fornecedor:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -119,7 +119,7 @@ export const fornecedorController = {
       }
 
       const { data, error } = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .insert({
           nome_fantasia,
           cnpj: cnpj || null,
@@ -134,14 +134,14 @@ export const fornecedorController = {
       // ✅ Normalizar ID
       const idNormalizado = data.id_fornecedor || data.id;
 
-      res.status(201).json({
+      return res.status(201).json({
         ...data,
         id: idNormalizado,
         id_fornecedor: idNormalizado,
       });
     } catch (error: any) {
       console.error('Erro ao criar fornecedor:', error);
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -159,14 +159,14 @@ export const fornecedorController = {
       let checkError = null;
 
       const check1 = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .select('*')
         .eq('id_fornecedor', id)
         .single();
 
       if (check1.error) {
         const check2 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('*')
           .eq('id', id)
           .single();
@@ -191,7 +191,7 @@ export const fornecedorController = {
       let updateError = null;
 
       const update1 = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .update(dataToUpdate)
         .eq('id_fornecedor', id)
         .select()
@@ -199,7 +199,7 @@ export const fornecedorController = {
 
       if (update1.error) {
         const update2 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .update(dataToUpdate)
           .eq('id', id)
           .select()
@@ -226,14 +226,14 @@ export const fornecedorController = {
       // ✅ Normalizar ID
       const idNormalizado = data.id_fornecedor || data.id;
 
-      res.json({
+      return res.json({
         ...data,
         id: idNormalizado,
         id_fornecedor: idNormalizado,
       });
     } catch (error: any) {
       console.error('Erro ao atualizar fornecedor:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
@@ -256,14 +256,14 @@ export const fornecedorController = {
       let deletado = false;
 
       const delete1 = await supabase
-        .from(TABELAS.FORNECEDOR)
+        .from(TABELAS.FORNECEDORES)
         .delete()
         .eq('id_fornecedor', id);
 
       if (delete1.error) {
         console.log('Tentativa com "id_fornecedor" falhou, tentando com "id"');
         const delete2 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .delete()
           .eq('id', id);
 
@@ -288,14 +288,17 @@ export const fornecedorController = {
         return res.status(404).json({ error: 'Fornecedor não encontrado' });
       }
 
-      res.json({ message: 'Fornecedor removido com sucesso' });
+      return res.json({ message: 'Fornecedor removido com sucesso' });
     } catch (error: any) {
       console.error('Erro completo ao deletar:', error);
-      res.status(500).json({
+      return res.status(500).json({
         error: error.message,
         details: error.details || 'Verifique se a tabela e colunas existem no banco de dados'
       });
     }
   }
 };
+
+
+
 

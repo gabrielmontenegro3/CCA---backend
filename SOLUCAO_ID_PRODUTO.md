@@ -243,3 +243,6 @@ const produtos = dados.map(normalizarProduto);
 ---
 
 **Última atualização:** Janeiro 2024
+
+
+

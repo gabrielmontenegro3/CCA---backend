@@ -4,10 +4,10 @@ import { TABELAS } from '../config/tabelas';
 
 export const produtoController = {
   // Listar todos os produtos (com dados do fornecedor)
-  getAll: async (req: Request, res: Response) => {
+  getAll: async (_req: Request, res: Response) => {
     try {
       const { data, error } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .order('nome_produto');
 
@@ -25,7 +25,7 @@ export const produtoController = {
             try {
               // Tentar buscar com id_fornecedor primeiro
               const fornecedorResult1 = await supabase
-                .from(TABELAS.FORNECEDOR)
+                .from(TABELAS.FORNECEDORES)
                 .select('*')
                 .eq('id_fornecedor', produto.id_fornecedor)
                 .single();
@@ -33,7 +33,7 @@ export const produtoController = {
               if (fornecedorResult1.error) {
                 // Tentar com 'id'
                 const fornecedorResult2 = await supabase
-                  .from(TABELAS.FORNECEDOR)
+                  .from(TABELAS.FORNECEDORES)
                   .select('*')
                   .eq('id', produto.id_fornecedor)
                   .single();
@@ -82,7 +82,7 @@ export const produtoController = {
 
       // Tentar com 'id'
       const result1 = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .select('*')
         .eq('id', id)
         .single();
@@ -90,7 +90,7 @@ export const produtoController = {
       if (result1.error) {
         // Tentar com 'id_produto'
         const result2 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .select('*')
           .eq('id_produto', id)
           .single();
@@ -124,14 +124,14 @@ export const produtoController = {
       if (data.id_fornecedor) {
         try {
           const fornecedorResult1 = await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('*')
             .eq('id_fornecedor', data.id_fornecedor)
             .single();
 
           if (fornecedorResult1.error) {
             const fornecedorResult2 = await supabase
-              .from(TABELAS.FORNECEDOR)
+              .from(TABELAS.FORNECEDORES)
               .select('*')
               .eq('id', data.id_fornecedor)
               .single();
@@ -184,14 +184,14 @@ export const produtoController = {
       // ✅ Validar se fornecedor existe (se id_fornecedor foi fornecido)
       if (id_fornecedor) {
         const check1 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('id_fornecedor')
           .eq('id_fornecedor', id_fornecedor)
           .single();
 
         if (check1.error) {
           const check2 = await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('id')
             .eq('id', id_fornecedor)
             .single();
@@ -205,7 +205,7 @@ export const produtoController = {
       }
 
       const { data, error } = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .insert({
           nome_produto,
           codigo_sku: codigo_sku || null,
@@ -237,14 +237,14 @@ export const produtoController = {
       if (data.id_fornecedor) {
         try {
           const fornecedorResult1 = await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('*')
             .eq('id_fornecedor', data.id_fornecedor)
             .single();
 
           if (fornecedorResult1.error) {
             const fornecedorResult2 = await supabase
-              .from(TABELAS.FORNECEDOR)
+              .from(TABELAS.FORNECEDORES)
               .select('*')
               .eq('id', data.id_fornecedor)
               .single();
@@ -290,14 +290,14 @@ export const produtoController = {
       // ✅ Validar se fornecedor existe (se id_fornecedor foi fornecido)
       if (dataToUpdate.id_fornecedor) {
         const check1 = await supabase
-          .from(TABELAS.FORNECEDOR)
+          .from(TABELAS.FORNECEDORES)
           .select('id_fornecedor')
           .eq('id_fornecedor', dataToUpdate.id_fornecedor)
           .single();
 
         if (check1.error) {
           const check2 = await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('id')
             .eq('id', dataToUpdate.id_fornecedor)
             .single();
@@ -315,7 +315,7 @@ export const produtoController = {
       let error = null;
 
       const result1 = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .update(dataToUpdate)
         .eq('id', id)
         .select()
@@ -324,7 +324,7 @@ export const produtoController = {
       if (result1.error) {
         // Tentar com 'id_produto'
         const result2 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .update(dataToUpdate)
           .eq('id_produto', id)
           .select()
@@ -362,14 +362,14 @@ export const produtoController = {
       if (data.id_fornecedor) {
         try {
           const fornecedorResult1 = await supabase
-            .from(TABELAS.FORNECEDOR)
+            .from(TABELAS.FORNECEDORES)
             .select('*')
             .eq('id_fornecedor', data.id_fornecedor)
             .single();
 
           if (fornecedorResult1.error) {
             const fornecedorResult2 = await supabase
-              .from(TABELAS.FORNECEDOR)
+              .from(TABELAS.FORNECEDORES)
               .select('*')
               .eq('id', data.id_fornecedor)
               .single();
@@ -422,7 +422,7 @@ export const produtoController = {
       let deletado = false;
 
       const delete1 = await supabase
-        .from(TABELAS.PRODUTO)
+        .from(TABELAS.PRODUTOS)
         .delete()
         .eq('id', id);
 
@@ -430,7 +430,7 @@ export const produtoController = {
         console.log('Tentativa com "id" falhou, tentando com "id_produto"');
         // Tentar com 'id_produto'
         const delete2 = await supabase
-          .from(TABELAS.PRODUTO)
+          .from(TABELAS.PRODUTOS)
           .delete()
           .eq('id_produto', id);
 
@@ -465,4 +465,7 @@ export const produtoController = {
     }
   }
 };
+
+
+
 

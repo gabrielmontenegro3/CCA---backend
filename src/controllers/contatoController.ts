@@ -23,9 +23,9 @@ export const contatoController = {
 
       if (error) throw error;
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -40,9 +40,9 @@ export const contatoController = {
 
       if (error) throw error;
 
-      res.status(201).json(data);
+      return res.status(201).json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -64,9 +64,9 @@ export const contatoController = {
         return res.status(404).json({ error: 'Contato não encontrado' });
       }
 
-      res.json(data);
+      return res.json(data);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   },
 
@@ -82,10 +82,13 @@ export const contatoController = {
 
       if (error) throw error;
 
-      res.json({ message: 'Contato removido com sucesso' });
+      return res.json({ message: 'Contato removido com sucesso' });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 };
+
+
+
 

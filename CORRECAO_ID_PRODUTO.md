@@ -358,3 +358,6 @@ Com essas informações, posso ajustar o código para usar o nome correto da col
 ---
 
 **Última atualização:** Janeiro 2024
+
+
+

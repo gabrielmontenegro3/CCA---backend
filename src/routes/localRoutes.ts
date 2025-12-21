@@ -10,3 +10,6 @@ router.put('/:id', localController.update);
 router.delete('/:id', localController.delete);
 
 export default router;
+
+
+

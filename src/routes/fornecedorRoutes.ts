@@ -11,3 +11,6 @@ router.delete('/:id', fornecedorController.delete);
 
 export default router;
 
+
+
+

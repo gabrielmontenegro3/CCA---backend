@@ -498,3 +498,6 @@ PUT /api/produtos/1  (com ID, método correto)
 ---
 
 **AÇÃO IMEDIATA:** Adicione os logs de debug acima e verifique no console qual é o valor de `produto.id` quando clica em "Editar".
+
+
+

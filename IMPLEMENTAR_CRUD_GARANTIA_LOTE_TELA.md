@@ -1074,3 +1074,6 @@ export default GarantiaLoteForm;
 ---
 
 **Última atualização:** Janeiro 2024
+
+
+

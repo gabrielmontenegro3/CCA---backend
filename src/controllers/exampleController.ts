@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 export const exampleController = {
-  getAll: (req: Request, res: Response) => {
+  getAll: (_req: Request, res: Response) => {
     res.json({ message: 'Exemplo de controller' });
   },
 
@@ -26,6 +26,9 @@ export const exampleController = {
     res.json({ message: `Deletado ID: ${id}` });
   }
 };
+
+
+
 
 
 
