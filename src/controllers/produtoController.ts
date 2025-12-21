@@ -9,7 +9,7 @@ export const produtoController = {
       const { data, error } = await supabase
         .from(TABELAS.PRODUTOS)
         .select('*')
-        .order('nome_produto');
+        .order('nome');
 
       if (error) throw error;
 
@@ -169,7 +169,7 @@ export const produtoController = {
   create: async (req: Request, res: Response) => {
     try {
       const {
-        nome_produto,
+        nome,
         codigo_sku,
         categoria,
         unidade_medida,
@@ -207,7 +207,7 @@ export const produtoController = {
       const { data, error } = await supabase
         .from(TABELAS.PRODUTOS)
         .insert({
-          nome_produto,
+          nome,
           codigo_sku: codigo_sku || null,
           categoria: categoria || null,
           unidade_medida: unidade_medida || null,

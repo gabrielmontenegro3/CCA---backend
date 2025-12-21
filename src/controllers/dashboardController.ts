@@ -119,7 +119,7 @@ export const dashboardController = {
                   id_unidade: unidade.id,
                   id_produto: produto.id,
                   unidade: unidade.numero || unidade.id,
-                  produto: produto.nome_produto,
+                  produto: produto.nome,
                   data_proximo_preventivo: proximoPreventivo.toISOString().split('T')[0],
                   frequencia_meses: produto.frequencia_preventiva_meses
                 });
