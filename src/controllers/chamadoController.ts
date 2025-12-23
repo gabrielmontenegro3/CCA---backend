@@ -2,111 +2,69 @@ import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { TABELAS } from '../config/tabelas';
 
-// Função auxiliar para verificar se produto está em garantia
-const verificarGarantia = async (idUnidade: string, idProduto: string): Promise<boolean> => {
-  try {
-    // Buscar unidade
-    const { data: unidade, error: unidadeError } = await supabase
-      .from(TABELAS.UNIDADE)
-      .select('*')
-      .eq('id', idUnidade)
-      .single();
-
-    if (unidadeError || !unidade) return false;
-
-    // Buscar empreendimento
-    const { data: empreendimento, error: empreendimentoError } = await supabase
-      .from(TABELAS.EMPREENDIMENTO)
-      .select('*')
-      .eq('id', unidade.id_empreendimento)
-      .single();
-
-    if (empreendimentoError || !empreendimento) return false;
-
-    // Buscar produto
-    const { data: produto, error: produtoError } = await supabase
-      .from(TABELAS.PRODUTOS)
-      .select('*')
-      .eq('id', idProduto)
-      .single();
-
-    if (produtoError || !produto) return false;
-
-    // Buscar relação unidade-produto
-    const { data: unidadeProduto } = await supabase
-      .from(TABELAS.UNIDADE_PRODUTO_GARANTIA)
-      .select('*')
-      .eq('id_unidade', idUnidade)
-      .eq('id_produto', idProduto)
-      .maybeSingle();
-
-    // Determinar data_base
-    const dataBase = unidadeProduto?.data_instalacao
-      ? new Date(unidadeProduto.data_instalacao)
-      : unidade.data_instalacao
-      ? new Date(unidade.data_instalacao)
-      : empreendimento?.data_entrega_chaves
-      ? new Date(empreendimento.data_entrega_chaves)
-      : new Date();
-
-    const hoje = new Date();
-
-    // Verificar garantia ABNT
-    if (produto.prazo_garantia_abnt_meses) {
-      const dataFimAbnt = new Date(dataBase);
-      dataFimAbnt.setMonth(dataFimAbnt.getMonth() + produto.prazo_garantia_abnt_meses);
-      if (hoje <= dataFimAbnt) return true;
-    }
-
-    // Verificar garantia fábrica
-    if (produto.prazo_garantia_fabrica_meses) {
-      const dataFimFabrica = new Date(dataBase);
-      dataFimFabrica.setMonth(dataFimFabrica.getMonth() + produto.prazo_garantia_fabrica_meses);
-      if (hoje <= dataFimFabrica) return true;
-    }
-
-    return false;
-  } catch (error) {
-    return false;
-  }
-};
-
 export const chamadoController = {
-  // Listar chamados (com filtros opcionais)
+  // Listar todos os chamados (com dados do usuário e filtros opcionais)
   getAll: async (req: Request, res: Response) => {
     try {
-      const { id_unidade, tipo_chamado, status } = req.query;
+      const { status, usuario } = req.query;
 
-      let query = supabase.from(TABELAS.CHAMADO).select('*');
+      // Buscar chamados
+      let query = supabase
+        .from(TABELAS.CHAMADO)
+        .select('*');
 
-      if (id_unidade) {
-        query = query.eq('id_unidade', id_unidade);
-      }
-
-      if (tipo_chamado) {
-        query = query.eq('tipo_chamado', tipo_chamado);
-      }
-
+      // Aplicar filtros
       if (status) {
         query = query.eq('status', status);
       }
 
-      const { data, error } = await query.order('data_abertura', { ascending: false });
+      if (usuario) {
+        query = query.eq('usuario', usuario);
+      }
+
+      const { data: chamados, error } = await query.order('id', { ascending: false });
 
       if (error) throw error;
 
-      return res.json(data);
+      // Buscar dados dos usuários
+      const usuarioIds = chamados?.map((c: any) => c.usuario) || [];
+      const usuariosUnicos = [...new Set(usuarioIds)];
+
+      let usuariosMap = new Map();
+      if (usuariosUnicos.length > 0) {
+        const { data: usuarios, error: usuariosError } = await supabase
+          .from(TABELAS.USUARIOS)
+          .select('id, nome, tipo')
+          .in('id', usuariosUnicos);
+
+        if (!usuariosError && usuarios) {
+          usuariosMap = new Map(usuarios.map((u: any) => [u.id, u]));
+        }
+      }
+
+      // Combinar dados
+      const chamadosComUsuario = chamados?.map((chamado: any) => ({
+        ...chamado,
+        usuario_dados: usuariosMap.get(chamado.usuario) || null
+      })) || [];
+
+      return res.json(chamadosComUsuario);
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Erro ao listar chamados:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao listar chamados' });
     }
   },
 
-  // Buscar chamado por id
+  // Buscar chamado por id (com dados do usuário)
   getById: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const { data, error } = await supabase
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      const { data: chamado, error } = await supabase
         .from(TABELAS.CHAMADO)
         .select('*')
         .eq('id', id)
@@ -114,44 +72,92 @@ export const chamadoController = {
 
       if (error) throw error;
 
-      if (!data) {
+      if (!chamado) {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      return res.json(data);
+      // Buscar dados do usuário
+      const { data: usuario, error: usuarioError } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id, nome, tipo')
+        .eq('id', chamado.usuario)
+        .single();
+
+      if (usuarioError) {
+        console.error('Erro ao buscar usuário:', usuarioError);
+      }
+
+      return res.json({
+        ...chamado,
+        usuario_dados: usuario || null
+      });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Erro ao buscar chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao buscar chamado' });
     }
   },
 
-  // Criar chamado (com validação automática de garantia)
+  // Criar chamado
   create: async (req: Request, res: Response) => {
     try {
-      const { id_unidade, id_produto, ...outrosCampos } = req.body;
+      const { titulo, usuario, status, descricao } = req.body;
 
-      // Verificar garantia se produto foi informado
-      let validacaoGarantia = null;
-      if (id_unidade && id_produto) {
-        const emGarantia = await verificarGarantia(id_unidade, id_produto);
-        validacaoGarantia = emGarantia ? 'DENTRO_DA_GARANTIA' : 'FORA_DA_GARANTIA';
+      // Validações
+      if (!titulo || !usuario || !status) {
+        return res.status(400).json({
+          error: 'titulo, usuario e status são obrigatórios'
+        });
       }
 
+      // Validar status
+      const statusValidos = ['aberto', 'em_andamento', 'resolvido', 'cancelado'];
+      if (!statusValidos.includes(status.toLowerCase())) {
+        return res.status(400).json({
+          error: `status deve ser um dos seguintes: ${statusValidos.join(', ')}`
+        });
+      }
+
+      // Verificar se o usuário existe
+      const { data: usuarioExistente, error: usuarioError } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id')
+        .eq('id', usuario)
+        .single();
+
+      if (usuarioError || !usuarioExistente) {
+        return res.status(400).json({
+          error: 'Usuário não encontrado'
+        });
+      }
+
+      // Criar chamado
       const { data, error } = await supabase
         .from(TABELAS.CHAMADO)
         .insert({
-          id_unidade,
-          id_produto,
-          validacao_garantia: validacaoGarantia,
-          ...outrosCampos
+          titulo,
+          usuario,
+          status: status.toLowerCase(),
+          descricao: descricao || null
         })
         .select('*')
         .single();
 
       if (error) throw error;
 
-      return res.status(201).json(data);
+      // Buscar dados do usuário para retornar
+      const { data: usuarioDados } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id, nome, tipo')
+        .eq('id', usuario)
+        .single();
+
+      return res.status(201).json({
+        ...data,
+        usuario_dados: usuarioDados || null
+      });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Erro ao criar chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao criar chamado' });
     }
   },
 
@@ -159,52 +165,180 @@ export const chamadoController = {
   update: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
+      const { titulo, usuario, status, descricao } = req.body;
+
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      // Verificar se o chamado existe e buscar dados atuais
+      const { data: chamadoExistente, error: errorExistente } = await supabase
+        .from(TABELAS.CHAMADO)
+        .select('id, usuario')
+        .eq('id', id)
+        .single();
+
+      if (errorExistente || !chamadoExistente) {
+        return res.status(404).json({ error: 'Chamado não encontrado' });
+      }
+
+      const updateData: any = {};
+
+      if (titulo !== undefined) {
+        if (!titulo || titulo.trim() === '') {
+          return res.status(400).json({ error: 'titulo não pode ser vazio' });
+        }
+        updateData.titulo = titulo;
+      }
+
+      if (usuario !== undefined) {
+        // Verificar se o usuário existe
+        const { data: usuarioExistente, error: usuarioError } = await supabase
+          .from(TABELAS.USUARIOS)
+          .select('id')
+          .eq('id', usuario)
+          .single();
+
+        if (usuarioError || !usuarioExistente) {
+          return res.status(400).json({ error: 'Usuário não encontrado' });
+        }
+        updateData.usuario = usuario;
+      }
+
+      if (status !== undefined) {
+        const statusValidos = ['aberto', 'em_andamento', 'resolvido', 'cancelado'];
+        if (!statusValidos.includes(status.toLowerCase())) {
+          return res.status(400).json({
+            error: `status deve ser um dos seguintes: ${statusValidos.join(', ')}`
+          });
+        }
+        updateData.status = status.toLowerCase();
+      }
+
+      if (descricao !== undefined) {
+        updateData.descricao = descricao;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+      }
 
       const { data, error } = await supabase
         .from(TABELAS.CHAMADO)
-        .update(req.body)
+        .update(updateData)
         .eq('id', id)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      if (!data) {
-        return res.status(404).json({ error: 'Chamado não encontrado' });
-      }
+      // Buscar dados do usuário para retornar
+      const usuarioId = updateData.usuario || chamadoExistente.usuario;
+      const { data: usuarioDados } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id, nome, tipo')
+        .eq('id', usuarioId)
+        .single();
 
-      return res.json(data);
+      return res.json({
+        ...data,
+        usuario_dados: usuarioDados || null
+      });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Erro ao atualizar chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao atualizar chamado' });
     }
   },
 
-  // Atualizar status do chamado
+  // Remover chamado
+  delete: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      // Verificar se o chamado existe
+      const { data: chamadoExistente, error: errorExistente } = await supabase
+        .from(TABELAS.CHAMADO)
+        .select('id')
+        .eq('id', id)
+        .single();
+
+      if (errorExistente || !chamadoExistente) {
+        return res.status(404).json({ error: 'Chamado não encontrado' });
+      }
+
+      const { error } = await supabase
+        .from(TABELAS.CHAMADO)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return res.json({ message: 'Chamado removido com sucesso' });
+    } catch (error: any) {
+      console.error('Erro ao remover chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao remover chamado' });
+    }
+  },
+
+  // Atualizar status do chamado (endpoint específico)
   updateStatus: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
 
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
       if (!status) {
-        return res.status(400).json({ error: 'Status é obrigatório' });
+        return res.status(400).json({ error: 'status é obrigatório' });
+      }
+
+      const statusValidos = ['aberto', 'em_andamento', 'resolvido', 'cancelado'];
+      if (!statusValidos.includes(status.toLowerCase())) {
+        return res.status(400).json({
+          error: `status deve ser um dos seguintes: ${statusValidos.join(', ')}`
+        });
+      }
+
+      // Verificar se o chamado existe
+      const { data: chamadoExistente, error: errorExistente } = await supabase
+        .from(TABELAS.CHAMADO)
+        .select('id')
+        .eq('id', id)
+        .single();
+
+      if (errorExistente || !chamadoExistente) {
+        return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
       const { data, error } = await supabase
         .from(TABELAS.CHAMADO)
-        .update({ status })
+        .update({ status: status.toLowerCase() })
         .eq('id', id)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      if (!data) {
-        return res.status(404).json({ error: 'Chamado não encontrado' });
-      }
+      // Buscar dados do usuário para retornar
+      const { data: usuarioDados } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id, nome, tipo')
+        .eq('id', data.usuario)
+        .single();
 
-      return res.json(data);
+      return res.json({
+        ...data,
+        usuario_dados: usuarioDados || null
+      });
     } catch (error: any) {
-      return res.status(500).json({ error: error.message });
+      console.error('Erro ao atualizar status do chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao atualizar status do chamado' });
     }
   }
 };

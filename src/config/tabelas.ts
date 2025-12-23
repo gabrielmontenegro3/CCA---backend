@@ -24,7 +24,9 @@ export const TABELAS = {
   CONTATO: 'contato',
   EMPREENDIMENTO: 'empreendimento',
   UNIDADE: 'unidade',
-  CHAMADO: 'chamado'
+  CHAMADO: 'chamado',
+  // Usuários
+  USUARIOS: 'usuarios'
 };
 
 
