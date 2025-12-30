@@ -9,7 +9,7 @@ export const usuarioController = {
     try {
       const { data, error } = await supabase
         .from(TABELAS.USUARIOS)
-        .select('id, nome, tipo')
+        .select('id, nome, tipo, telefone, telefone2, unidade')
         .order('nome', { ascending: true });
 
       if (error) throw error;
@@ -32,7 +32,7 @@ export const usuarioController = {
 
       const { data, error } = await supabase
         .from(TABELAS.USUARIOS)
-        .select('id, nome, tipo')
+        .select('id, nome, tipo, telefone, telefone2, unidade')
         .eq('id', id)
         .single();
 
@@ -52,7 +52,7 @@ export const usuarioController = {
   // Criar usuário
   create: async (req: Request, res: Response) => {
     try {
-      const { nome, senha, tipo } = req.body;
+      const { nome, senha, tipo, telefone, telefone2, unidade } = req.body;
 
       // Validações
       if (!nome || !senha || !tipo) {
@@ -91,9 +91,12 @@ export const usuarioController = {
         .insert({
           nome,
           senha: senhaHash,
-          tipo: tipo.toLowerCase()
+          tipo: tipo.toLowerCase(),
+          telefone: telefone || null,
+          telefone2: telefone2 || null,
+          unidade: unidade || null
         })
-        .select('id, nome, tipo')
+        .select('id, nome, tipo, telefone, telefone2, unidade')
         .single();
 
       if (error) throw error;
@@ -109,7 +112,7 @@ export const usuarioController = {
   update: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { nome, senha, tipo } = req.body;
+      const { nome, senha, tipo, telefone, telefone2, unidade } = req.body;
 
       if (!id || isNaN(Number(id))) {
         return res.status(400).json({ error: 'ID inválido' });
@@ -170,6 +173,19 @@ export const usuarioController = {
         updateData.tipo = tipo.toLowerCase();
       }
 
+      // Campos opcionais (telefone, telefone2, unidade)
+      if (telefone !== undefined) {
+        updateData.telefone = telefone || null;
+      }
+
+      if (telefone2 !== undefined) {
+        updateData.telefone2 = telefone2 || null;
+      }
+
+      if (unidade !== undefined) {
+        updateData.unidade = unidade || null;
+      }
+
       if (Object.keys(updateData).length === 0) {
         return res.status(400).json({ error: 'Nenhum campo para atualizar' });
       }
@@ -178,7 +194,7 @@ export const usuarioController = {
         .from(TABELAS.USUARIOS)
         .update(updateData)
         .eq('id', id)
-        .select('id, nome, tipo')
+        .select('id, nome, tipo, telefone, telefone2, unidade')
         .single();
 
       if (error) throw error;
@@ -297,11 +313,21 @@ export const usuarioController = {
         return res.status(401).json({ error: 'Credenciais inválidas' });
       }
 
+      // Buscar dados completos do usuário (incluindo novos campos)
+      const { data: usuarioCompleto } = await supabase
+        .from(TABELAS.USUARIOS)
+        .select('id, nome, tipo, telefone, telefone2, unidade')
+        .eq('id', usuario.id)
+        .single();
+
       // Retornar dados do usuário (sem a senha)
-      return res.json({
+      return res.json(usuarioCompleto || {
         id: usuario.id,
         nome: usuario.nome,
-        tipo: usuario.tipo
+        tipo: usuario.tipo,
+        telefone: null,
+        telefone2: null,
+        unidade: null
       });
     } catch (error: any) {
       console.error('Erro ao fazer login:', error);
@@ -309,3 +335,4 @@ export const usuarioController = {
     }
   }
 };
+

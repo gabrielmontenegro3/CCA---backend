@@ -7,10 +7,12 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   console.error('Erro:', err);
+  console.error('Stack:', err.stack);
   
   res.status(500).json({
     error: 'Erro interno do servidor',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 };
 

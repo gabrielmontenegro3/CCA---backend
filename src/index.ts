@@ -28,6 +28,7 @@ import sistemaEdificacaoRoutes from './routes/sistemaEdificacaoRoutes';
 import manutencaoPreventivaNovoRoutes from './routes/manutencaoPreventivaNovoRoutes';
 import fornecedorProdutoRoutes from './routes/fornecedorProdutoRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
+import imagemRoutes from './routes/imagemRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,6 +75,7 @@ app.use('/api/sistemas-edificacao', sistemaEdificacaoRoutes);
 app.use('/api/manutencoes-preventivas-novo', manutencaoPreventivaNovoRoutes);
 app.use('/api/fornecedor-produtos', fornecedorProdutoRoutes);
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/imagens', imagemRoutes);
 
 // Rota de teste de conexão com Supabase
 app.get('/test-db', async (_req: Request, res: Response) => {
@@ -186,6 +188,11 @@ const server = app.listen(PORT, () => {
   console.log(`   POST   /api/usuarios`);
   console.log(`   PUT    /api/usuarios/:id`);
   console.log(`   DELETE /api/usuarios/:id`);
+  console.log(`   GET    /api/imagens`);
+  console.log(`   GET    /api/imagens/:id`);
+  console.log(`   POST   /api/imagens/upload`);
+  console.log(`   GET    /api/imagens/:id/download`);
+  console.log(`   DELETE /api/imagens/:id`);
 });
 
 // Tratamento de erros do servidor

@@ -25,8 +25,13 @@ export const TABELAS = {
   EMPREENDIMENTO: 'empreendimento',
   UNIDADE: 'unidade',
   CHAMADO: 'chamado',
+  // Chat de Chamados
+  MENSAGENS_CHAMADO: 'mensagens_chamado',
+  ANEXOS_MENSAGEM: 'anexos_mensagem',
   // Usuários
-  USUARIOS: 'usuarios'
+  USUARIOS: 'usuarios',
+  // Imagens
+  IMAGENS: 'imagens'
 };
 
 
