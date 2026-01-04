@@ -31,7 +31,11 @@ export const TABELAS = {
   // Usuários
   USUARIOS: 'usuarios',
   // Imagens
-  IMAGENS: 'imagens'
+  IMAGENS: 'imagens',
+  // Vistoria / Laudo
+  VISTORIA_LAUDO: 'vistoria_laudo',
+  VISTORIA_LAUDO_MENSAGEM: 'vistoria_laudo_mensagem',
+  VISTORIA_LAUDO_ARQUIVO: 'vistoria_laudo_arquivo'
 };
 
 

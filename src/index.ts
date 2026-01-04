@@ -29,6 +29,7 @@ import manutencaoPreventivaNovoRoutes from './routes/manutencaoPreventivaNovoRou
 import fornecedorProdutoRoutes from './routes/fornecedorProdutoRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
 import imagemRoutes from './routes/imagemRoutes';
+import vistoriaLaudoRoutes from './routes/vistoriaLaudoRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,6 +77,7 @@ app.use('/api/manutencoes-preventivas-novo', manutencaoPreventivaNovoRoutes);
 app.use('/api/fornecedor-produtos', fornecedorProdutoRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/imagens', imagemRoutes);
+app.use('/api/vistoria-laudos', vistoriaLaudoRoutes);
 
 // Rota de teste de conexão com Supabase
 app.get('/test-db', async (_req: Request, res: Response) => {
@@ -193,6 +195,17 @@ const server = app.listen(PORT, () => {
   console.log(`   POST   /api/imagens/upload`);
   console.log(`   GET    /api/imagens/:id/download`);
   console.log(`   DELETE /api/imagens/:id`);
+  console.log(`   GET    /api/vistoria-laudos`);
+  console.log(`   GET    /api/vistoria-laudos/:id`);
+  console.log(`   POST   /api/vistoria-laudos`);
+  console.log(`   PUT    /api/vistoria-laudos/:id`);
+  console.log(`   DELETE /api/vistoria-laudos/:id`);
+  console.log(`   POST   /api/vistoria-laudos/:id/mensagens`);
+  console.log(`   GET    /api/vistoria-laudos/:id/mensagens`);
+  console.log(`   POST   /api/vistoria-laudos/:id/arquivos`);
+  console.log(`   GET    /api/vistoria-laudos/:id/arquivos`);
+  console.log(`   GET    /api/vistoria-laudos/arquivos/:id/download`);
+  console.log(`   DELETE /api/vistoria-laudos/arquivos/:id`);
 });
 
 // Tratamento de erros do servidor
