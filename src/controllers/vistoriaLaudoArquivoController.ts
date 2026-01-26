@@ -132,8 +132,28 @@ export const vistoriaLaudoArquivoController = {
         });
       }
 
+      // Gerar URLs assinadas para arquivos criados
+      const arquivosComUrl = await Promise.all(
+        arquivosCriados.map(async (arquivo: any) => {
+          try {
+            const url = await getSignedUrlVistoriaLaudo(arquivo.file_path, 3600); // URL válida por 1 hora
+            return {
+              ...arquivo,
+              url
+            };
+          } catch (urlError) {
+            console.error(`Erro ao gerar URL para arquivo ${arquivo.id}:`, urlError);
+            return {
+              ...arquivo,
+              url: null,
+              erro_url: 'Erro ao gerar URL'
+            };
+          }
+        })
+      );
+
       return res.status(201).json({
-        arquivos: arquivosCriados,
+        arquivos: arquivosComUrl,
         erros: erros.length > 0 ? erros : undefined
       });
     } catch (error: any) {

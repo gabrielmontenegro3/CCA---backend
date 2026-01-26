@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { TABELAS } from '../config/tabelas';
+import { getSignedUrlVistoriaLaudo } from '../services/storageService';
 
 // Helper para obter ID do usuário logado
 function getUsuarioLogado(req: Request): number | null {
@@ -144,10 +145,30 @@ export const vistoriaLaudoMensagemController = {
         .update({ updated_at: new Date().toISOString() })
         .eq('id', vistoria_laudo_id);
 
+      // Gerar URLs assinadas para arquivos
+      const arquivosComUrl = await Promise.all(
+        arquivos.map(async (arquivo: any) => {
+          try {
+            const url = await getSignedUrlVistoriaLaudo(arquivo.file_path, 3600); // URL válida por 1 hora
+            return {
+              ...arquivo,
+              url
+            };
+          } catch (urlError) {
+            console.error(`Erro ao gerar URL para arquivo ${arquivo.id}:`, urlError);
+            return {
+              ...arquivo,
+              url: null,
+              erro_url: 'Erro ao gerar URL'
+            };
+          }
+        })
+      );
+
       // Retornar mensagem com arquivos
       return res.status(201).json({
         ...novaMensagem,
-        arquivos
+        arquivos: arquivosComUrl
       });
     } catch (error: any) {
       console.error('Erro ao criar mensagem:', error);
@@ -199,9 +220,29 @@ export const vistoriaLaudoMensagemController = {
             .eq('mensagem_id', msg.id)
             .order('created_at', { ascending: true });
 
+          // Gerar URLs assinadas para arquivos da mensagem
+          const arquivosComUrl = await Promise.all(
+            (arquivos || []).map(async (arquivo: any) => {
+              try {
+                const url = await getSignedUrlVistoriaLaudo(arquivo.file_path, 3600); // URL válida por 1 hora
+                return {
+                  ...arquivo,
+                  url
+                };
+              } catch (urlError) {
+                console.error(`Erro ao gerar URL para arquivo ${arquivo.id}:`, urlError);
+                return {
+                  ...arquivo,
+                  url: null,
+                  erro_url: 'Erro ao gerar URL'
+                };
+              }
+            })
+          );
+
           return {
             ...msg,
-            arquivos: arquivos || []
+            arquivos: arquivosComUrl || []
           };
         })
       );

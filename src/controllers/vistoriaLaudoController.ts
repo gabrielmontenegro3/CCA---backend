@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { TABELAS } from '../config/tabelas';
+import { getSignedUrlVistoriaLaudo } from '../services/storageService';
 
 // Helper para obter ID do usuário logado
 function getUsuarioLogado(req: Request): number | null {
@@ -156,6 +157,26 @@ export const vistoriaLaudoController = {
         throw arquivosLaudoError;
       }
 
+      // Gerar URLs assinadas para arquivos do laudo
+      const arquivosLaudoComUrl = await Promise.all(
+        (arquivosLaudo || []).map(async (arquivo: any) => {
+          try {
+            const url = await getSignedUrlVistoriaLaudo(arquivo.file_path, 3600); // URL válida por 1 hora
+            return {
+              ...arquivo,
+              url
+            };
+          } catch (urlError) {
+            console.error(`Erro ao gerar URL para arquivo ${arquivo.id}:`, urlError);
+            return {
+              ...arquivo,
+              url: null,
+              erro_url: 'Erro ao gerar URL'
+            };
+          }
+        })
+      );
+
       // Buscar arquivos associados a cada mensagem
       const mensagensComArquivos = await Promise.all(
         (mensagens || []).map(async (msg: any) => {
@@ -165,9 +186,29 @@ export const vistoriaLaudoController = {
             .eq('mensagem_id', msg.id)
             .order('created_at', { ascending: true });
 
+          // Gerar URLs assinadas para arquivos da mensagem
+          const arquivosMensagemComUrl = await Promise.all(
+            (arquivosMensagem || []).map(async (arquivo: any) => {
+              try {
+                const url = await getSignedUrlVistoriaLaudo(arquivo.file_path, 3600); // URL válida por 1 hora
+                return {
+                  ...arquivo,
+                  url
+                };
+              } catch (urlError) {
+                console.error(`Erro ao gerar URL para arquivo ${arquivo.id}:`, urlError);
+                return {
+                  ...arquivo,
+                  url: null,
+                  erro_url: 'Erro ao gerar URL'
+                };
+              }
+            })
+          );
+
           return {
             ...msg,
-            arquivos: arquivosMensagem || []
+            arquivos: arquivosMensagemComUrl || []
           };
         })
       );
@@ -175,7 +216,7 @@ export const vistoriaLaudoController = {
       return res.json({
         ...laudo,
         mensagens: mensagensComArquivos,
-        arquivos: arquivosLaudo || []
+        arquivos: arquivosLaudoComUrl || []
       });
     } catch (error: any) {
       console.error('Erro ao buscar laudo:', error);
