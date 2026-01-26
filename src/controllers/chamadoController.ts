@@ -593,6 +593,89 @@ export const chamadoController = {
       console.error('Erro ao atualizar status do chamado:', error);
       return res.status(500).json({ error: error.message || 'Erro ao atualizar status do chamado' });
     }
+  },
+
+  // 6️⃣ ATUALIZAR CHAMADO (título e descrição)
+  update: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { titulo, descricao } = req.body;
+      const usuarioId = getUsuarioLogado(req);
+
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      if (!usuarioId) {
+        return res.status(400).json({ error: 'Usuário não identificado' });
+      }
+
+      // Verificar se o chamado existe
+      const { data: chamadoExistente, error: chamadoError } = await supabase
+        .from(TABELAS.CHAMADO)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (chamadoError || !chamadoExistente) {
+        return res.status(404).json({ error: 'Chamado não encontrado' });
+      }
+
+      // Obter tipo do usuário para validar permissões
+      const tipoUsuario = await getTipoUsuario(usuarioId);
+      
+      if (!tipoUsuario) {
+        return res.status(400).json({ error: 'Tipo de usuário não encontrado' });
+      }
+
+      // Validar permissões para atualizar chamado (apenas morador pode atualizar seus próprios chamados, outros podem todos)
+      if (tipoUsuario === 'morador') {
+        if (chamadoExistente.usuario !== usuarioId) {
+          return res.status(403).json({ 
+            error: 'Acesso negado. Você só pode atualizar seus próprios chamados' 
+          });
+        }
+      }
+
+      // Preparar dados para atualização
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (titulo !== undefined) {
+        if (typeof titulo !== 'string' || !titulo.trim()) {
+          return res.status(400).json({ error: 'titulo não pode ser vazio' });
+        }
+        updateData.titulo = titulo.trim();
+      }
+
+      if (descricao !== undefined) {
+        if (typeof descricao !== 'string' && descricao !== null) {
+          return res.status(400).json({ error: 'descricao deve ser uma string ou null' });
+        }
+        updateData.descricao = descricao ? descricao.trim() : null;
+      }
+
+      // Se nenhum campo foi fornecido para atualização
+      if (Object.keys(updateData).length === 1 && updateData.updated_at) {
+        return res.status(400).json({ error: 'Nenhum campo válido fornecido para atualização (titulo, descricao)' });
+      }
+
+      // Atualizar chamado
+      const { data: chamadoAtualizado, error: updateError } = await supabase
+        .from(TABELAS.CHAMADO)
+        .update(updateData)
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (updateError) throw updateError;
+
+      return res.json(chamadoAtualizado);
+    } catch (error: any) {
+      console.error('Erro ao atualizar chamado:', error);
+      return res.status(500).json({ error: error.message || 'Erro ao atualizar chamado' });
+    }
   }
 };
 

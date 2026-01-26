@@ -23,6 +23,7 @@ router.get('/', chamadoController.getAll);
 router.get('/:id', chamadoController.getById);
 router.post('/', uploadAny, chamadoController.create);
 router.post('/:id/mensagens', uploadAny, chamadoController.enviarMensagem);
+router.put('/:id', chamadoController.update);
 router.patch('/:id/status', chamadoController.updateStatus);
 
 export default router;
