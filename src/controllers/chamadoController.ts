@@ -234,6 +234,7 @@ export const chamadoController = {
         anexos: msg.anexos || []
       }));
 
+      res.setHeader('X-Chamado-Anexos', 'path-based');
       return res.status(201).json({
         ...chamado,
         mensagens: mensagensFormatadas
@@ -391,6 +392,7 @@ export const chamadoController = {
       // Adicionar informação sobre permissões do usuário
       const podeEscrever = await podeEscreverMensagem(usuarioId);
 
+      res.setHeader('X-Chamado-Anexos', 'path-based');
       return res.json({
         ...chamado,
         mensagens: mensagensFormatadas,
@@ -526,6 +528,7 @@ export const chamadoController = {
         .eq('id', id);
 
       // Retornar mensagem formatada
+      res.setHeader('X-Chamado-Anexos', 'path-based');
       return res.status(201).json({
         id: novaMensagem.id,
         autor_tipo: novaMensagem.autor_tipo,

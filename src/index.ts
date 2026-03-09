@@ -56,6 +56,15 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Rota para conferir no deploy: anexos de chamados usam path (não URL que expira)
+app.get('/version', (_req: Request, res: Response) => {
+  res.json({
+    version: '1.0.0',
+    anexosChamado: 'path-based',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Rotas da API
 app.use('/api/produtos', produtoRoutes);
 app.use('/api/fornecedores', fornecedorRoutes);
