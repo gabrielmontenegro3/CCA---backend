@@ -70,6 +70,46 @@ export async function uploadFiles(
 }
 
 // ============================================
+// CHAMADOS: upload retorna apenas file_path (sem URL que expira)
+// ============================================
+
+/**
+ * Faz upload de arquivo para chamados e retorna apenas o path no bucket.
+ * O path não expira; a URL assinada deve ser gerada sob demanda (ex: getSignedUrlVistoriaLaudo).
+ */
+export async function uploadFileChamado(
+  file: Express.Multer.File,
+  folder: string
+): Promise<string> {
+  const timestamp = Date.now();
+  const fileName = `${folder}/${timestamp}_${file.originalname}`;
+
+  const putObjectCommand = new PutObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: fileName,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+    Metadata: {
+      originalName: file.originalname,
+      uploadedAt: new Date().toISOString()
+    }
+  });
+
+  await s3Client.send(putObjectCommand);
+  return fileName;
+}
+
+/**
+ * Faz upload de múltiplos arquivos para chamados; retorna array de paths (não URLs).
+ */
+export async function uploadFilesChamado(
+  files: Express.Multer.File[],
+  folder: string
+): Promise<string[]> {
+  return Promise.all(files.map(file => uploadFileChamado(file, folder)));
+}
+
+// ============================================
 // FUNÇÕES ESPECÍFICAS PARA VISTORIA/LAUDO
 // ============================================
 

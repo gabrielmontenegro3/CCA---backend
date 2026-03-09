@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { TABELAS } from '../config/tabelas';
-import { uploadFiles } from '../services/storageService';
+import { uploadFilesChamado, getSignedUrlVistoriaLaudo } from '../services/storageService';
 
 // Helper para obter ID do usuário logado (pode vir de header ou body)
 function getUsuarioLogado(req: Request): number | null {
@@ -160,25 +160,28 @@ export const chamadoController = {
         
         console.log(`Fazendo upload de ${files.length} arquivo(s)`);
         
-        // Upload dos arquivos
-        const urls = await uploadFiles(files, folder);
+        // Upload: grava apenas o path no bucket (não URL que expira)
+        const paths = await uploadFilesChamado(files, folder);
 
-        // Criar registros de anexos
+        // Criar registros de anexos (url = file_path, igual vistoria-laudos)
         for (let i = 0; i < files.length; i++) {
           const { data: anexo, error: anexoError } = await supabase
             .from(TABELAS.ANEXOS_MENSAGEM)
             .insert({
               mensagem_id: mensagemInicial.id,
-              url: urls[i],
+              url: paths[i],
               tipo: files[i].mimetype
             })
             .select('*')
             .single();
 
           if (!anexoError && anexo) {
+            const urlParaFront = anexo.url.startsWith('http')
+              ? anexo.url
+              : await getSignedUrlVistoriaLaudo(anexo.url, 3600);
             anexos.push({
               id: anexo.id,
-              url: anexo.url,
+              url: urlParaFront,
               tipo: anexo.tipo
             });
           }
@@ -198,17 +201,25 @@ export const chamadoController = {
         throw mensagensError;
       }
 
-      // Buscar anexos para cada mensagem
+      // Buscar anexos para cada mensagem e resolver path -> URL assinada (1h)
       const mensagensComAnexos = await Promise.all(
         (mensagens || []).map(async (msg: any) => {
-          const { data: anexos } = await supabase
+          const { data: anexosDb } = await supabase
             .from(TABELAS.ANEXOS_MENSAGEM)
             .select('id, url, tipo')
             .eq('mensagem_id', msg.id);
-          
+          const anexosResolvidos = await Promise.all(
+            (anexosDb || []).map(async (a: any) => ({
+              id: a.id,
+              url: a.url.startsWith('http')
+                ? a.url
+                : await getSignedUrlVistoriaLaudo(a.url, 3600),
+              tipo: a.tipo
+            }))
+          );
           return {
             ...msg,
-            anexos: anexos || []
+            anexos: anexosResolvidos
           };
         })
       );
@@ -340,17 +351,25 @@ export const chamadoController = {
         throw mensagensError;
       }
 
-      // Buscar anexos para cada mensagem
+      // Buscar anexos para cada mensagem e resolver path -> URL assinada (1h)
       const mensagensComAnexos = await Promise.all(
         (mensagens || []).map(async (msg: any) => {
-          const { data: anexos } = await supabase
+          const { data: anexosDb } = await supabase
             .from(TABELAS.ANEXOS_MENSAGEM)
             .select('id, url, tipo')
             .eq('mensagem_id', msg.id);
-          
+          const anexosResolvidos = await Promise.all(
+            (anexosDb || []).map(async (a: any) => ({
+              id: a.id,
+              url: a.url.startsWith('http')
+                ? a.url
+                : await getSignedUrlVistoriaLaudo(a.url, 3600),
+              tipo: a.tipo
+            }))
+          );
           return {
             ...msg,
-            anexos: anexos || []
+            anexos: anexosResolvidos
           };
         })
       );
@@ -472,25 +491,28 @@ export const chamadoController = {
         
         console.log(`Fazendo upload de ${files.length} arquivo(s) para mensagem`);
         
-        // Upload dos arquivos
-        const urls = await uploadFiles(files, folder);
+        // Upload: grava apenas o path no bucket (não URL que expira)
+        const paths = await uploadFilesChamado(files, folder);
 
-        // Criar registros de anexos
+        // Criar registros de anexos (url = file_path, igual vistoria-laudos)
         for (let i = 0; i < files.length; i++) {
           const { data: anexo, error: anexoError } = await supabase
             .from(TABELAS.ANEXOS_MENSAGEM)
             .insert({
               mensagem_id: novaMensagem.id,
-              url: urls[i],
+              url: paths[i],
               tipo: files[i].mimetype
             })
             .select('*')
             .single();
 
           if (!anexoError && anexo) {
+            const urlParaFront = anexo.url.startsWith('http')
+              ? anexo.url
+              : await getSignedUrlVistoriaLaudo(anexo.url, 3600);
             anexos.push({
               id: anexo.id,
-              url: anexo.url,
+              url: urlParaFront,
               tipo: anexo.tipo
             });
           }
