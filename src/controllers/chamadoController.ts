@@ -75,7 +75,7 @@ export const chamadoController = {
 
       // Validações
       if (!titulo || (typeof titulo === 'string' && !titulo.trim())) {
-        return res.status(400).json({ error: 'titulo é obrigatório' });
+        return res.status(400).json({ error: 'Colocar o titulo é obrigatório' });
       }
 
       if (!usuarioId) {
